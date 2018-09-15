@@ -9,20 +9,28 @@ func TestSqrt(t *testing.T) {
 	type args struct {
 		x float64
 	}
+	type want struct {
+		x           float64
+		expectError bool
+	}
 	tests := []struct {
 		name string
 		args args
-		want float64
+		want want
 	}{
-		{"integer", args{4}, 2},
-		{"double", args{2}, 1.414213562373095},
-		{"zero", args{0}, 0},
-		{"negative value", args{-1}, 0},
+		{"integer", args{4}, want{2, false}},
+		{"double", args{2}, want{1.414213562373095, false}},
+		{"zero", args{0}, want{0, false}},
+		{"negative value", args{-1}, want{-1, true}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Sqrt(tt.args.x); got != tt.want {
-				t.Errorf("Sqrt() = %v, want %v", got, tt.want)
+			got, err := Sqrt(tt.args.x)
+			if got != tt.want.x {
+				t.Errorf("Sqrt(%v) = %v, want %v", got, got, tt.want.x)
+			}
+			if (err != nil) != tt.want.expectError {
+				t.Errorf("error is `%s`, but error is expected %v", err, tt.want.expectError)
 			}
 		})
 	}
