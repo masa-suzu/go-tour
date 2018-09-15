@@ -92,3 +92,23 @@ func TestWordCount(t *testing.T) {
 		}
 	}
 }
+
+func TestFibonacci(t *testing.T) {
+	tests := []struct {
+		name string
+		in   int
+		want []int
+	}{
+		{"10 times", 10, []int{0, 1, 1, 2, 3, 5, 8, 13, 21, 34}},
+	}
+	for _, tt := range tests {
+		f := Fibonacci()
+		t.Run(tt.name, func(t *testing.T) {
+			for i, v := range tt.want {
+				if got := f(); got != v {
+					t.Errorf("Fibonacci(%v) = %v, want %v", i, got, v)
+				}
+			}
+		})
+	}
+}
