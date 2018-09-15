@@ -112,3 +112,23 @@ func TestFibonacci(t *testing.T) {
 		})
 	}
 }
+
+func TestIPAddr(t *testing.T) {
+	tests := []struct {
+		name string
+		args [4]byte
+		want string
+	}{
+		{"googleDNS", [4]byte{8, 8, 8, 8}, "8.8.8.8"},
+		{"loopBack", [4]byte{127, 0, 0, 1}, "localhost"},
+		{"empty", [4]byte{}, "0.0.0.0"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ip := IPAddr(tt.args)
+			if got := ip.String(); got != tt.want {
+				t.Errorf("IPAddr.String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
