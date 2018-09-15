@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"fmt"
+
 	"golang.org/x/tour/tree"
 )
 
@@ -269,4 +271,70 @@ func TestSame(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestCrawl(t *testing.T) {
+	sites := map[string]*fakeResult{
+		"https://golang.org/": {
+			"The Go Programming Language",
+			[]string{
+				"https://golang.org/pkg/",
+				"https://golang.org/cmd/",
+			},
+		},
+		"https://golang.org/pkg/": {
+			"Packages",
+			[]string{
+				"https://golang.org/",
+				"https://golang.org/cmd/",
+				"https://golang.org/pkg/fmt/",
+				"https://golang.org/pkg/os/",
+			},
+		},
+		"https://golang.org/pkg/fmt/": {
+			"Package fmt",
+			[]string{
+				"https://golang.org/",
+				"https://golang.org/pkg/",
+			},
+		},
+		"https://golang.org/pkg/os/": {
+			"Package os",
+			[]string{
+				"https://golang.org/",
+				"https://golang.org/pkg/",
+			},
+		},
+	}
+	fake := &fakeFetcher{sites, t, make(map[string]string)}
+	Crawl("https://golang.org/", 4, fake)
+
+	if 5 != len(fake.cache) {
+		t.Errorf("numbers of urls are %v, want %v", len(fake.cache), 5)
+	}
+	for key := range sites {
+		if _, ok := fake.cache[key]; !ok {
+			t.Errorf("url %v is not fetched", key)
+		}
+	}
+}
+
+// fakeFetcher is Fetcher that returns canned results.
+type fakeFetcher struct {
+	result map[string]*fakeResult
+	t      *testing.T
+	cache  map[string]string
+}
+
+func (f fakeFetcher) Fetch(url string) (string, []string, error) {
+	f.cache[url] = url
+	if res, ok := f.result[url]; ok {
+		return res.body, res.urls, nil
+	}
+	return "", nil, fmt.Errorf("not found: %s", url)
+}
+
+type fakeResult struct {
+	body string
+	urls []string
 }
