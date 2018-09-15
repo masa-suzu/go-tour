@@ -1,6 +1,7 @@
 package tour
 
 import (
+	"image/color"
 	"reflect"
 	"strings"
 	"testing"
@@ -42,21 +43,29 @@ func TestPic(t *testing.T) {
 		dx int
 		dy int
 	}
+	type want struct {
+		image Image
+		model color.Model
+	}
 	tests := []struct {
 		name string
 		args args
-		want [][]uint8
+		want want
 	}{
-		{"both are positive(1)", args{1, 2}, [][]uint8{{0}, {0}}},
-		{"both are positive(2)", args{2, 1}, [][]uint8{{0, 0}}},
-		{"both are zero", args{0, 0}, [][]uint8{}},
-		{"x is zero", args{0, 0}, [][]uint8{}},
-		{"y is zero", args{0, 1}, [][]uint8{{}}},
+		{"both are positive(1)", args{1, 2}, want{Image{2, 1}, color.RGBA64Model}},
+		{"both are positive(2)", args{2, 1}, want{Image{1, 2}, color.RGBA64Model}},
+		{"both are zero", args{0, 0}, want{Image{0, 0}, color.RGBA64Model}},
+		{"x is zero", args{2, 0}, want{Image{0, 2}, color.RGBA64Model}},
+		{"y is zero", args{0, 1}, want{Image{1, 0}, color.RGBA64Model}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Pic(tt.args.dx, tt.args.dy); !reflect.DeepEqual(got, tt.want) {
+			got := Pic(tt.args.dx, tt.args.dy)
+			if !reflect.DeepEqual(*got, tt.want.image) {
 				t.Errorf("Pic() = %v, want %v", got, tt.want)
+			}
+			if got.ColorModel() != tt.want.model {
+				t.Errorf("ColorModel() = %v, want %v", got.ColorModel(), tt.want.model)
 			}
 		})
 	}
