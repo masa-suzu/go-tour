@@ -2,6 +2,7 @@ package tour
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -175,6 +176,31 @@ func TestInfiniteA(t *testing.T) {
 					t.Errorf("InfiniteA.Read() error = %v, wantErr %v", err, tt.want.e)
 					return
 				}
+			}
+		})
+	}
+}
+func TestRot13Reader(t *testing.T) {
+	tests := []struct {
+		name string
+		args string
+		want string
+	}{
+		{"sample", "Lbh penpxrq gur pbqr!", "You cracked the code!"},
+		{"japanese", "Lbh penpxrq gur 日本語1!", "You cracked the 日本語1!"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := strings.NewReader(tt.args)
+			rot13 := &Rot13Reader{s}
+			b := make([]byte, 1024)
+			n, err := rot13.Read(b)
+			if err != nil {
+				t.Errorf("an error occurs: '%v'", err)
+			}
+			got := string(b[0:n])
+			if got != tt.want {
+				t.Errorf("Rot13Reader.Read() = %v, want %v", got, tt.want)
 			}
 		})
 	}
