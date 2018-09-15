@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"golang.org/x/tour/tree"
 )
 
 func TestSqrt(t *testing.T) {
@@ -189,6 +191,7 @@ func TestInfiniteA(t *testing.T) {
 		})
 	}
 }
+
 func TestRot13Reader(t *testing.T) {
 	tests := []struct {
 		name string
@@ -210,6 +213,59 @@ func TestRot13Reader(t *testing.T) {
 			got := string(b[0:n])
 			if got != tt.want {
 				t.Errorf("Rot13Reader.Read() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestWalk(t *testing.T) {
+	type args struct {
+		t  *tree.Tree
+		ch chan int
+	}
+	tests := []struct {
+		name string
+		args args
+		want []int
+	}{
+		{"Tree1", args{tree.New(1), make(chan int, 1)}, []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
+		{"Tree2", args{tree.New(2), make(chan int, 1)}, []int{2, 4, 6, 8, 10, 12, 14, 16, 18, 20}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			go Walk(tt.args.t, tt.args.ch)
+
+			for v := range tt.args.ch {
+				if v != tt.want[0] {
+					t.Errorf("Walk() = %v, want %v", v, tt.want[0])
+				}
+				if len(tt.want) > 0 {
+					tt.want = append(tt.want[:0], tt.want[1:]...)
+				}
+			}
+		})
+	}
+}
+
+func TestSame(t *testing.T) {
+	type args struct {
+		t1 *tree.Tree
+		t2 *tree.Tree
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{"Tree1", args{tree.New(1), tree.New(1)}, true},
+		{"Tree1", args{tree.New(3), tree.New(1)}, false},
+		{"Tree1", args{tree.New(1), tree.New(3)}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := Same(tt.args.t1, tt.args.t2)
+			if got != tt.want {
+				t.Errorf("Same() = %v, want %v", got, tt.want)
 			}
 		})
 	}
