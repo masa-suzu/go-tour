@@ -140,3 +140,42 @@ func TestIPAddr(t *testing.T) {
 		})
 	}
 }
+
+func TestInfiniteA(t *testing.T) {
+	type args struct {
+		i int
+	}
+	type want struct {
+		v byte
+		i int
+		e error
+	}
+	tests := []struct {
+		name string
+		args args
+		want want
+	}{
+		{"100", args{100}, want{'A', 1, nil}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := InfiniteA{}
+			for i := 0; i < tt.args.i; i++ {
+				b := make([]byte, 1)
+				got, err := r.Read(b)
+				if b[0] != tt.want.v {
+					t.Errorf("InfiniteA.Read() head = %v, want %v", got, tt.want.v)
+				}
+
+				if got != tt.want.i {
+					t.Errorf("InfiniteA.Read() size = %v, want %v", got, tt.want.i)
+				}
+
+				if err != tt.want.e {
+					t.Errorf("InfiniteA.Read() error = %v, wantErr %v", err, tt.want.e)
+					return
+				}
+			}
+		})
+	}
+}
